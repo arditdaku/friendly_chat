@@ -24,15 +24,36 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
+  final List<ChatMessage> _messages = [];
+  final FocusNode _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FriendlyChat'),
-      ),
-      body: _buildTextComposer(),
-    );
+        appBar: AppBar(
+          title: const Text('FriendlyChat'),
+        ),
+        body: Column(
+          children: [
+            Flexible(
+              child: ListView.builder(
+                itemBuilder: (_, index) => _messages[index],
+                itemCount: _messages.length,
+                padding: const EdgeInsets.all(8.0),
+                reverse: true,
+              ),
+            ),
+            const Divider(
+              height: 1.0,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+              ),
+              child: _buildTextComposer(),
+            ),
+          ],
+        ));
   }
 
   Widget _buildTextComposer() {
@@ -46,6 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onSubmitted: _handleSubmit,
               decoration:
                   const InputDecoration.collapsed(hintText: 'Send a message'),
+              focusNode: _focusNode,
             ),
           ),
           IconTheme(
@@ -65,14 +87,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSubmit(String text) {
     _textController.clear();
+    var message = ChatMessage(text: text);
+    setState(() {
+      _messages.insert(0, message);
+    });
+    _focusNode.requestFocus();
   }
 }
 
 class ChatMessage extends StatelessWidget {
-  const ChatMessage({Key? key}) : super(key: key);
+  const ChatMessage({required this.text, Key? key}) : super(key: key);
+  final String text;
 
   @override
   Widget build(BuildContext context) {
+    String _name = 'Ardit Daku';
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
@@ -80,7 +110,22 @@ class ChatMessage extends StatelessWidget {
         children: [
           Container(
             margin: const EdgeInsets.only(right: 16.0),
-            // child: ,
+            child: CircleAvatar(
+              child: Text(_name[0]),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _name,
+                style: Theme.of(context).textTheme.headline4,
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 5.0),
+                child: Text(text),
+              ),
+            ],
           ),
         ],
       ),
